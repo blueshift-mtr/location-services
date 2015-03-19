@@ -28,8 +28,6 @@
         <source-file src="src/android/LocationUpdateService.java" target-dir="src/com/blueshift/cordova/location" />
         <source-file src="src/android/GeofenceUpdateService.java" target-dir="src/com/blueshift/cordova/location" />
         <source-file src="src/android/GeofenceUpdateIntentService.java" target-dir="src/com/blueshift/cordova/location" />
-        
-        <source-file src="src/android/MyVerifier.java" target-dir="src/com/blueshift/cordova/location" />
     
         <source-file src="src/android/data/DAOFactory.java" target-dir="src/com/blueshift/cordova/location/data" />
         <source-file src="src/android/data/Location.java" target-dir="src/com/blueshift/cordova/location/data" />
