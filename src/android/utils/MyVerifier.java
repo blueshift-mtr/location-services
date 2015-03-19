@@ -1,7 +1,7 @@
 package com.blueshift.cordova.location;
 
 class MyVerifier extends AbstractVerifier {
-
+    /*
     private final X509HostnameVerifier delegate;
 
     public MyVerifier(final X509HostnameVerifier delegate) {
@@ -26,10 +26,10 @@ class MyVerifier extends AbstractVerifier {
             }
             if(!ok) throw e;
         }
-    }
+    }*/
 }
 
-
+/*
 public DefaultHttpClient getTolerantClient() {
     DefaultHttpClient client = new DefaultHttpClient();
     SSLSocketFactory sslSocketFactory = (SSLSocketFactory) client
@@ -40,4 +40,4 @@ public DefaultHttpClient getTolerantClient() {
         sslSocketFactory.setHostnameVerifier(new MyVerifier(delegate));
     }
     return client;
-}
+}*/
