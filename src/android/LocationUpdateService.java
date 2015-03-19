@@ -4,10 +4,17 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.Random;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -63,6 +70,16 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
 import static java.lang.Math.*;
+
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.X509TrustManager;
 
 public class LocationUpdateService 
             extends Service 
@@ -447,6 +464,25 @@ public class LocationUpdateService
             Log.d(TAG, "PostLocationTask#onPostExecture");
         }
     }
+    
+    public DefaultHttpClient getTolerantClient() {
+        HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+
+        DefaultHttpClient client = new DefaultHttpClient();
+        
+        SchemeRegistry registry = new SchemeRegistry();
+        SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
+        socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+        registry.register(new Scheme("https", socketFactory, 443));
+        SingleClientConnManager mgr = new SingleClientConnManager(client.getParams(), registry);
+        DefaultHttpClient httpClient = new DefaultHttpClient(mgr, client.getParams());
+        
+        // Set verifier     
+        HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+        
+        return httpClient;
+    }
+    
 
     private boolean postLocationSync(com.tenforwardconsulting.cordova.bgloc.data.Location l, LocationDAO dao) {
         if (l == null) {
@@ -456,7 +492,9 @@ public class LocationUpdateService
         try {
             lastUpdateTime = SystemClock.elapsedRealtime();
             Log.i(TAG, "Posting  native location update: " + l);
-            DefaultHttpClient httpClient = new DefaultHttpClient();
+            
+            DefaultHttpClient httpClient = getTolerantClient();
+                
             HttpPost request = new HttpPost(url);
 
             JSONObject location = new JSONObject();

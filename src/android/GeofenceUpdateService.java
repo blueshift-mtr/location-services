@@ -38,9 +38,9 @@ import com.google.android.gms.maps.model.LatLng;
 
 
 public class GeofenceUpdateService
-extends Service 
+extends Service
 implements  GoogleApiClient.ConnectionCallbacks,
-            GoogleApiClient.OnConnectionFailedListener {
+GoogleApiClient.OnConnectionFailedListener {
     
     private static final String TAG = "GeofenceUpdateService";
     
@@ -53,7 +53,7 @@ implements  GoogleApiClient.ConnectionCallbacks,
     private boolean geofencesAdded;
     
     private PendingIntent geoServicePI;
-
+    
     @Override
     public void onCreate() {
         super.onCreate();
@@ -77,16 +77,16 @@ implements  GoogleApiClient.ConnectionCallbacks,
         
         connectToPlayAPI();
         
-        return startId;
+        return START_REDELIVER_INTENT;
     }
     
     protected synchronized void connectToPlayAPI() {
         Log.d(TAG, "- Geofence, connecting to GAPI");;
         locationClientAPI =  new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+        .addApi(LocationServices.API)
+        .addConnectionCallbacks(this)
+        .addOnConnectionFailedListener(this)
+        .build();
         locationClientAPI.connect();
     }
     
@@ -102,11 +102,11 @@ implements  GoogleApiClient.ConnectionCallbacks,
                 JSONObject coord = f.getJSONObject("coordinate");
                 
                 Geofence g = new Geofence.Builder()
-                    .setRequestId(f.getString("name"))
-                    .setExpirationDuration(f.getInt("expDuration"))
-                    .setCircularRegion(coord.getDouble("latitude"), coord.getDouble("longitude"), f.getInt("radius"))
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                    .build();
+                .setRequestId(f.getString("name"))
+                .setExpirationDuration(f.getInt("expDuration"))
+                .setCircularRegion(coord.getDouble("latitude"), coord.getDouble("longitude"), f.getInt("radius"))
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build();
                 
                 geofences.add(g);
             } catch(JSONException e) {
@@ -119,7 +119,7 @@ implements  GoogleApiClient.ConnectionCallbacks,
         return true;
     }
     
-  
+    
     private PendingIntent getGeofencePendingIntent() {
         // Reuse the PendingIntent if we already have it.
         Log.e(TAG, "Building Pending Intent...");
@@ -137,15 +137,15 @@ implements  GoogleApiClient.ConnectionCallbacks,
     
     private GeofencingRequest getGeofencingRequest() {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-
+        
         // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
         // GEOFENCE_TRANSITION_ENTER notification when the geofence is added and if the device
         // is already inside that geofence.
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
-
+        
         // Add the geofences to be monitored by geofencing service.
         builder.addGeofences(geofences);
-
+        
         // Return a GeofencingRequest.
         return builder.build();
     }
@@ -157,23 +157,23 @@ implements  GoogleApiClient.ConnectionCallbacks,
         }
         
         LocationServices.GeofencingApi.addGeofences(
-                locationClientAPI,
-                getGeofencingRequest(),
-                getGeofencePendingIntent()
-                ).setResultCallback(new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        if (status.isSuccess()) {
-                     
-                            Log.e(TAG, "Succesfully added geofences!");
-                        } else {
-                            // Get the status code for the error and log it using a user-friendly message.
-                           /* String errorMessage = GeofenceErrorMessages.getErrorString(this,
-                                    status.getStatusCode());*/
-                            Log.e(TAG, "ERROR" + status);
-                        }
-                    }
-                });
+                                                    locationClientAPI,
+                                                    getGeofencingRequest(),
+                                                    getGeofencePendingIntent()
+                                                    ).setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(Status status) {
+                if (status.isSuccess()) {
+                    
+                    Log.e(TAG, "Succesfully added geofences!");
+                } else {
+                    // Get the status code for the error and log it using a user-friendly message.
+                    /* String errorMessage = GeofenceErrorMessages.getErrorString(this,
+                     status.getStatusCode());*/
+                    Log.e(TAG, "ERROR" + status);
+                }
+            }
+        });
     }
     
     @Override
@@ -187,15 +187,15 @@ implements  GoogleApiClient.ConnectionCallbacks,
     public void onConnected(Bundle connectionHint) {
         Log.d(TAG, "Conntected To Geofence API");
         buildGeofences();
-       
+        
     }
-
+    
     @Override
     public void onConnectionFailed(com.google.android.gms.common.ConnectionResult result) {
         Log.e(TAG, "We failed to connect to the Geo API!" + result);
         Toast.makeText(this, "COULDNT CONNECT, FUCK", Toast.LENGTH_SHORT).show();
     }
-
+    
     @Override
     public void onConnectionSuspended(int cause) {
         // locationClientAPI.connect();

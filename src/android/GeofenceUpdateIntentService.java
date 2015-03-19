@@ -22,11 +22,19 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,6 +79,8 @@ extends IntentService {
         
         toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
     }
+    
+    
     
     /**
      * Handles incoming intents.
@@ -187,7 +197,7 @@ extends IntentService {
                 data = new JSONObject();
             }
             
-            HttpClient http = new DefaultHttpClient();
+            HttpClient http = getTolerantClient();
             HttpPost request = new HttpPost(url);
             
             request.setEntity(new ByteArrayEntity(data.toString().getBytes("UTF8")));
@@ -199,6 +209,24 @@ extends IntentService {
             Log.e(TAG, "ERROR POSTING TO SERVER" + e.toString());
         }
         return true;
+    }
+    
+    public DefaultHttpClient getTolerantClient() {
+        HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+
+        DefaultHttpClient client = new DefaultHttpClient();
+        
+        SchemeRegistry registry = new SchemeRegistry();
+        SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
+        socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+        registry.register(new Scheme("https", socketFactory, 443));
+        SingleClientConnManager mgr = new SingleClientConnManager(client.getParams(), registry);
+        DefaultHttpClient httpClient = new DefaultHttpClient(mgr, client.getParams());
+        
+        // Set verifier     
+        HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+        
+        return httpClient;
     }
     
     public boolean isConnected(){
