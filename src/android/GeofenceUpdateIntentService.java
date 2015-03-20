@@ -68,9 +68,9 @@ extends IntentService {
     
     
     public GeofenceUpdateIntentService() {
-           // Use the TAG to name the worker thread.
-           super(TAG);
-           Log.i(TAG, "CONSTRUCT GeofenceUpdateIntentService");
+        // Use the TAG to name the worker thread.
+        super(TAG);
+        Log.i(TAG, "CONSTRUCT GeofenceUpdateIntentService");
     }
     
     @Override
@@ -112,7 +112,7 @@ extends IntentService {
         
         if (geofencingEvent.hasError()) {
             String errorMessage = getErrorString(this,
-                    geofencingEvent.getErrorCode());
+                                                 geofencingEvent.getErrorCode());
             Log.e(TAG, errorMessage);
             return;
         }
@@ -126,18 +126,18 @@ extends IntentService {
         startTone("dialtone");
         
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-                geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-
+            geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-
+            
             // Get the transition details as a String.
             String geofenceTransitionDetails = getGeofenceTransitionDetails(
-                    this,
-                    geofenceTransition,
-                    triggeringGeofences
-            );
-
+                                                                            this,
+                                                                            geofenceTransition,
+                                                                            triggeringGeofences
+                                                                            );
+            
             // Send notification and log the transition details.
             //sendNotification(geofenceTransitionDetails);
             Toast.makeText(this, geofenceTransitionDetails, Toast.LENGTH_LONG).show();
@@ -149,19 +149,19 @@ extends IntentService {
     }
     
     private String getGeofenceTransitionDetails(
-            Context context,
-            int geofenceTransition,
-            List<Geofence> triggeringGeofences) {
-
+                                                Context context,
+                                                int geofenceTransition,
+                                                List<Geofence> triggeringGeofences) {
+        
         String geofenceTransitionString = getTransitionString(geofenceTransition);
-
+        
         // Get the Ids of each geofence that was triggered.
         ArrayList triggeringGeofencesIdsList = new ArrayList();
         for (Geofence geofence : triggeringGeofences) {
             triggeringGeofencesIdsList.add(geofence.getRequestId());
         }
         String triggeringGeofencesIdsString = TextUtils.join(", ",  triggeringGeofencesIdsList);
-
+        
         return geofenceTransitionString + ": " + triggeringGeofencesIdsString;
     }
     
@@ -200,7 +200,21 @@ extends IntentService {
             HttpClient http = getTolerantClient(url);
             HttpPost request = new HttpPost(url);
             
-            request.setEntity(new ByteArrayEntity(data.toString().getBytes("UTF8")));
+            
+            StringEntity se = new StringEntity(data.toString());
+            request.setEntity(se);
+            request.setHeader("Accept", "application/json");
+            request.setHeader("Content-type", "application/json");
+            
+            Iterator<String> headkeys = headers.keys();
+            while( headkeys.hasNext() ){
+                String headkey = headkeys.next();
+                if(headkey != null) {
+                    Log.d(TAG, "Adding Header: " + headkey + " : " + (String)headers.getString(headkey));
+                    request.setHeader(headkey, (String)headers.getString(headkey));
+                }
+            }
+            Log.d(TAG, "Posting to " + request.getURI().toString());
             
             HttpResponse response = http.execute(request);
             
@@ -212,11 +226,11 @@ extends IntentService {
     }
     
     public DefaultHttpClient getTolerantClient(String url) {
-          DefaultHttpClient client = new DefaultHttpClient();
-          if(!(url.substring(0, 5)).equals("https")) {
-              return client;
-          }
-          
+        DefaultHttpClient client = new DefaultHttpClient();
+        if(!(url.substring(0, 5)).equals("https")) {
+            return client;
+        }
+        
         HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
         
         SchemeRegistry registry = new SchemeRegistry();
@@ -226,7 +240,7 @@ extends IntentService {
         SingleClientConnManager mgr = new SingleClientConnManager(client.getParams(), registry);
         DefaultHttpClient httpClient = new DefaultHttpClient(mgr, client.getParams());
         
-        // Set verifier     
+        // Set verifier
         HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
         
         return httpClient;
@@ -234,11 +248,11 @@ extends IntentService {
     
     public boolean isConnected(){
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-            if (networkInfo != null && networkInfo.isConnected()) 
-                return true;
-            else
-                return false;    
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected())
+            return true;
+        else
+            return false;
     }
     
     /**
@@ -248,7 +262,7 @@ extends IntentService {
     private void startTone(String name) {
         int tone = 0;
         int duration = 1000;
-
+        
         if (name.equals("beep")) {
             tone = ToneGenerator.TONE_PROP_BEEP;
         } else if (name.equals("beep_beep_beep")) {
@@ -264,5 +278,5 @@ extends IntentService {
         }
         toneGenerator.startTone(tone, duration);
     }
-
+    
 }
