@@ -197,7 +197,7 @@ extends IntentService {
                 data = new JSONObject();
             }
             
-            HttpClient http = getTolerantClient();
+            HttpClient http = getTolerantClient(url);
             HttpPost request = new HttpPost(url);
             
             request.setEntity(new ByteArrayEntity(data.toString().getBytes("UTF8")));
@@ -211,10 +211,13 @@ extends IntentService {
         return true;
     }
     
-    public DefaultHttpClient getTolerantClient() {
+    public DefaultHttpClient getTolerantClient(String url) {
+          DefaultHttpClient client = new DefaultHttpClient();
+          if(!(url.substring(0, 5)).equals("https")) {
+              return client;
+          }
+          
         HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
-        DefaultHttpClient client = new DefaultHttpClient();
         
         SchemeRegistry registry = new SchemeRegistry();
         SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();

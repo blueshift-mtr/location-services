@@ -468,7 +468,7 @@ public class LocationUpdateService
     public DefaultHttpClient getTolerantClient() {
         DefaultHttpClient client = new DefaultHttpClient();
         
-        if(!(url.substring(0, 4)).equals("https")) {
+        if(!(url.substring(0, 5)).equals("https")) {
             return client;
         }
         

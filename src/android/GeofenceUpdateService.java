@@ -79,7 +79,7 @@ GoogleApiClient.OnConnectionFailedListener {
         
         connectToPlayAPI();
         
-        return START_REDELIVER_INTENT;
+        return START_STICKY;
     }
     
     protected synchronized void connectToPlayAPI() {
@@ -97,16 +97,22 @@ GoogleApiClient.OnConnectionFailedListener {
         
         for(int i = 0; i < jsonFences.length(); i++) {
             try {
-                Log.e(TAG, "Setting Up Fence" + (jsonFences.getJSONObject(i).toString()));
                 
                 JSONObject f = jsonFences.getJSONObject(i);
                 
                 JSONObject coord = f.getJSONObject("coordinate");
                 
+                int dur = f.getInt("expDuration");
+                if(dur == 0) {
+                    dur = -1;
+                }
+                
+                Log.e(TAG, "Setting Up Fence" + f.getString("name") + " " + f.getInt("expDuration") + " " + coord.getDouble("latitude") + " " + coord.getDouble("longitude") + " " + f.getInt("radius"));
+                
                 Geofence g = new Geofence.Builder()
                 .setRequestId(f.getString("name"))
-                .setExpirationDuration(f.getInt("expDuration"))
-                .setCircularRegion(coord.getDouble("latitude"), coord.getDouble("longitude"), f.getInt("radius"))
+                .setExpirationDuration(dur)
+                .setCircularRegion(coord.getDouble("latitude"),  coord.getDouble("longitude"), f.getInt("radius"))
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
                 .build();
                 
@@ -168,8 +174,8 @@ GoogleApiClient.OnConnectionFailedListener {
                 if (status.isSuccess()) {
                     
                     Log.e(TAG, "Succesfully added geofences!");
-                   /*
-                    Location loc = LocationServices.FusedLocationApi.getLastLocation(locationClientAPI);
+                   
+                    /*Location loc = LocationServices.FusedLocationApi.getLastLocation(locationClientAPI);
                     if(loc != null) {
                         LocationServices.FusedLocationApi.setMockMode(locationClientAPI, true);
                         LocationServices.FusedLocationApi.setMockLocation(locationClientAPI, loc);
