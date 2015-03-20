@@ -3,6 +3,7 @@ package com.blueshift.cordova.location;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -53,6 +54,7 @@ GoogleApiClient.OnConnectionFailedListener {
     private boolean geofencesAdded;
     
     private PendingIntent geoServicePI;
+   
     
     @Override
     public void onCreate() {
@@ -166,6 +168,12 @@ GoogleApiClient.OnConnectionFailedListener {
                 if (status.isSuccess()) {
                     
                     Log.e(TAG, "Succesfully added geofences!");
+                    
+                    Location loc = LocationServices.FusedLocationApi.getLastLocation(locationClientAPI);
+                    if(loc != null) {
+                        LocationServices.FusedLocationApi.setMockMode(locationClientAPI, true);
+                        LocationServices.FusedLocationApi.setMockLocation(locationClientAPI, loc);
+                    }
                 } else {
                     // Get the status code for the error and log it using a user-friendly message.
                     /* String errorMessage = GeofenceErrorMessages.getErrorString(this,
