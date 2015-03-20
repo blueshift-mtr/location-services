@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -35,6 +36,7 @@ import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.entity.StringEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -206,14 +208,6 @@ extends IntentService {
             request.setHeader("Accept", "application/json");
             request.setHeader("Content-type", "application/json");
             
-            Iterator<String> headkeys = headers.keys();
-            while( headkeys.hasNext() ){
-                String headkey = headkeys.next();
-                if(headkey != null) {
-                    Log.d(TAG, "Adding Header: " + headkey + " : " + (String)headers.getString(headkey));
-                    request.setHeader(headkey, (String)headers.getString(headkey));
-                }
-            }
             Log.d(TAG, "Posting to " + request.getURI().toString());
             
             HttpResponse response = http.execute(request);
