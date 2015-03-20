@@ -466,9 +466,13 @@ public class LocationUpdateService
     }
     
     public DefaultHttpClient getTolerantClient() {
-        HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
         DefaultHttpClient client = new DefaultHttpClient();
+        
+        if(!(url.substring(0, 4)).equals("https")) {
+            return client;
+        }
+        
+        HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
         
         SchemeRegistry registry = new SchemeRegistry();
         SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
@@ -516,17 +520,25 @@ public class LocationUpdateService
 
             Iterator<String> headkeys = headers.keys();
             while( headkeys.hasNext() ){
-        String headkey = headkeys.next();
-        if(headkey != null) {
-                    Log.d(TAG, "Adding Header: " + headkey + " : " + (String)headers.getString(headkey));
-                    request.setHeader(headkey, (String)headers.getString(headkey));
-        }
+                String headkey = headkeys.next();
+                if(headkey != null) {
+                            Log.d(TAG, "Adding Header: " + headkey + " : " + (String)headers.getString(headkey));
+                            request.setHeader(headkey, (String)headers.getString(headkey));
+                }
             }
             Log.d(TAG, "Posting to " + request.getURI().toString());
             HttpResponse response = httpClient.execute(request);
             Log.i(TAG, "Response received: " + response.getStatusLine());
-            if (response.getStatusLine().getStatusCode() == 200) {
+            
+            int res = response.getStatusLine().getStatusCode();
+            
+            if (res == 200) {
                 return true;
+            } else if(res == 410) {
+                Log.e(TAG, "ALERT --- : Got kill signal from server");
+                this.stopRecording();
+                this.cleanUp();
+                return false;
             } else {
                 return false;
             }
