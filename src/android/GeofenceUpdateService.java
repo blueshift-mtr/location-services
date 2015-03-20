@@ -149,7 +149,7 @@ GoogleApiClient.OnConnectionFailedListener {
         // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
         // GEOFENCE_TRANSITION_ENTER notification when the geofence is added and if the device
         // is already inside that geofence.
-        //builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
         
         // Add the geofences to be monitored by geofencing service.
         builder.addGeofences(geofences);
