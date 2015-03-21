@@ -51,10 +51,10 @@ GoogleApiClient.OnConnectionFailedListener {
     
     private JSONArray jsonFences;
     
-    private boolean geofencesAdded;
+    private ArrayList<Geofence> geofenceIds;
     
     private PendingIntent geoServicePI;
-   
+    
     
     @Override
     public void onCreate() {
@@ -117,6 +117,7 @@ GoogleApiClient.OnConnectionFailedListener {
                 .build();
                 
                 geofences.add(g);
+                geofenceIds.add(f.getString("name"));
             } catch(JSONException e) {
                 e.printStackTrace();
             }
@@ -174,12 +175,12 @@ GoogleApiClient.OnConnectionFailedListener {
                 if (status.isSuccess()) {
                     
                     Log.e(TAG, "Succesfully added geofences!");
-                   
+                    
                     /*Location loc = LocationServices.FusedLocationApi.getLastLocation(locationClientAPI);
-                    if(loc != null) {
-                        LocationServices.FusedLocationApi.setMockMode(locationClientAPI, true);
-                        LocationServices.FusedLocationApi.setMockLocation(locationClientAPI, loc);
-                    }*/
+                     if(loc != null) {
+                     LocationServices.FusedLocationApi.setMockMode(locationClientAPI, true);
+                     LocationServices.FusedLocationApi.setMockLocation(locationClientAPI, loc);
+                     }*/
                 } else {
                     // Get the status code for the error and log it using a user-friendly message.
                     /* String errorMessage = GeofenceErrorMessages.getErrorString(this,
@@ -213,5 +214,36 @@ GoogleApiClient.OnConnectionFailedListener {
     @Override
     public void onConnectionSuspended(int cause) {
         // locationClientAPI.connect();
+    }
+    
+    
+    @Override
+    public boolean stopService(Intent intent) {
+        Log.i(TAG, "- Received stop: " + intent);
+        this.cleanUp();
+        if (isDebugging) {
+            Toast.makeText(this, "Removed Locations", Toast.LENGTH_SHORT).show();
+        }
+        return super.stopService(intent);
+    }
+    
+    @Override
+    public void onDestroy() {
+        Log.w(TAG, "------------------------------------------ Destroyed Location update Service");
+        this.cleanUp();
+        super.onDestroy();
+    }
+    
+    private void cleanUp() {
+        // this.disable();
+        toneGenerator.release();
+        LocationServices.GeofencingApi.removeGeofences(locationClientAPI, geofenceIds);
+        
+    }
+    
+    //@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
     }
 }

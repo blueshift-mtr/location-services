@@ -21,7 +21,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
     public static final String ACTION_SET_CONFIG = "setConfig";
     
     private Intent updateServiceIntent;
-    private Intent geoFenceServiceIntent;
+    private Intent geofenceServiceIntent;
     
     private Boolean isEnabled = false;
     
@@ -49,7 +49,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
         
         Boolean result = false;
         updateServiceIntent = new Intent(activity, LocationUpdateService.class);
-        geoFenceServiceIntent = new Intent(activity, GeofenceUpdateService.class);
+        geofenceServiceIntent = new Intent(activity, GeofenceUpdateService.class);
         
         if (ACTION_START.equalsIgnoreCase(action) && !isEnabled) {
             result = true;
@@ -75,8 +75,8 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
                 activity.startService(updateServiceIntent);
                 
                 if(this.fences != null) {
-                    geoFenceServiceIntent.putExtra("fences", this.fences.toString());
-                    activity.startService(geoFenceServiceIntent);
+                    geofenceServiceIntent.putExtra("fences", this.fences.toString());
+                    activity.startService(geofenceServiceIntent);
                     
                     Log.i(TAG, this.fences.toString());
                 }
@@ -152,6 +152,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
         
         if(isEnabled && stopOnTerminate.equalsIgnoreCase("true")) {
             activity.stopService(updateServiceIntent);
+            activity.stopService(geofenceServiceIntent)
         }
     }
 }
