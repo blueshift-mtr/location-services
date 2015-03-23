@@ -51,7 +51,7 @@ GoogleApiClient.OnConnectionFailedListener {
     
     private JSONArray jsonFences;
     
-    private ArrayList<Geofence> geofenceIds;
+    private ArrayList<String> geofenceIds;
     
     private PendingIntent geoServicePI;
     
@@ -64,9 +64,16 @@ GoogleApiClient.OnConnectionFailedListener {
         
         geoServicePI = null;
         geofences = new ArrayList<Geofence>();
+        geofenceIds = new ArrayList<String>();
         
     }
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null) {
+            String source = "intent";
+            Log.e (TAG, source + " was null, flags=" + flags + " bits=" + Integer.toBinaryString (flags));
+            return START_STICKY;
+        }
+        
         Log.e(TAG, "GeofenceUpdateService onStartCommand");
         
         try {
@@ -221,9 +228,8 @@ GoogleApiClient.OnConnectionFailedListener {
     public boolean stopService(Intent intent) {
         Log.i(TAG, "- Received stop: " + intent);
         this.cleanUp();
-        if (isDebugging) {
-            Toast.makeText(this, "Removed Locations", Toast.LENGTH_SHORT).show();
-        }
+        Toast.makeText(this, "Removed Locations", Toast.LENGTH_SHORT).show();
+        
         return super.stopService(intent);
     }
     
@@ -236,7 +242,6 @@ GoogleApiClient.OnConnectionFailedListener {
     
     private void cleanUp() {
         // this.disable();
-        toneGenerator.release();
         LocationServices.GeofencingApi.removeGeofences(locationClientAPI, geofenceIds);
         
     }

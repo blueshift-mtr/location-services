@@ -152,7 +152,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
         
         if(isEnabled && stopOnTerminate.equalsIgnoreCase("true")) {
             activity.stopService(updateServiceIntent);
-            activity.stopService(geofenceServiceIntent)
+            activity.stopService(geofenceServiceIntent);
         }
     }
 }
