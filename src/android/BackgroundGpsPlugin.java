@@ -104,7 +104,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
                 this.isDebugging = data.getString(7);
                 this.notificationTitle = data.getString(8);
                 this.notificationText = data.getString(9);
-                this.stopOnTerminate = data.getString(11);
+                this.stopOnTerminate = data.getString(11); 
                 this.interval = data.getString(12);
                 this.fastestInterval = data.getString(13);
                 
@@ -124,6 +124,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
     
     private static final String STOP_RECORDING  = "com.tenforwardconsulting.cordova.bgloc.STOP_RECORDING";
     private static final String START_RECORDING = "com.tenforwardconsulting.cordova.bgloc.START_RECORDING";
+    private static final String STOP_GEOFENCES = "com.blueshift.cordova.location.STOP_GEOFENCES";
     
     @Override
     public void onPause(boolean multitasking) {

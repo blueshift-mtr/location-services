@@ -2,6 +2,7 @@ package com.blueshift.cordova.location;
 
 import android.app.Activity;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -37,6 +38,9 @@ import com.google.android.gms.location.GeofencingApi;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import android.content.IntentFilter;
+import android.content.BroadcastReceiver;
+
 
 public class GeofenceUpdateService
 extends Service
@@ -55,6 +59,8 @@ GoogleApiClient.OnConnectionFailedListener {
     
     private PendingIntent geoServicePI;
     
+    private static final String STOP_GEOFENCES = "com.blueshift.cordova.location.STOP_GEOFENCES";
+    
     
     @Override
     public void onCreate() {
@@ -65,6 +71,8 @@ GoogleApiClient.OnConnectionFailedListener {
         geoServicePI = null;
         geofences = new ArrayList<Geofence>();
         geofenceIds = new ArrayList<String>();
+        
+        registerReceiver(stopGeofenceServiceReceiver, new IntentFilter(STOP_GEOFENCES));
         
     }
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -82,6 +90,7 @@ GoogleApiClient.OnConnectionFailedListener {
             e.printStackTrace();
         }
         
+       
         initGeofences();
         
         connectToPlayAPI();
@@ -157,7 +166,7 @@ GoogleApiClient.OnConnectionFailedListener {
         // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
         // GEOFENCE_TRANSITION_ENTER notification when the geofence is added and if the device
         // is already inside that geofence.
-        //builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
         
         // Add the geofences to be monitored by geofencing service.
         builder.addGeofences(geofences);
@@ -242,6 +251,8 @@ GoogleApiClient.OnConnectionFailedListener {
     
     private void cleanUp() {
         // this.disable();
+        Log.i(TAG, "Removing geofences");
+        unregisterReceiver(stopGeofenceServiceReceiver);
         LocationServices.GeofencingApi.removeGeofences(locationClientAPI, geofenceIds);
         
     }
@@ -251,4 +262,14 @@ GoogleApiClient.OnConnectionFailedListener {
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
     }
+    
+    private BroadcastReceiver stopGeofenceServiceReceiver = new BroadcastReceiver() {
+          @Override
+          public void onReceive(Context context, Intent intent) {
+              Log.i(TAG, "RECIEVED BROADCAST FROM" + context + " WITH INTENT" + intent);
+              Log.i(TAG, "Killing geofence service... got kill switch");
+              cleanUp();
+          }
+          
+    };
 }

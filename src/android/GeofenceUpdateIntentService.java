@@ -174,7 +174,7 @@ extends IntentService {
             case Geofence.GEOFENCE_TRANSITION_EXIT:
                 return "EXITED";
             default:
-                return "SHIT";
+                return "DWELL";
         }
     }
     
@@ -211,6 +211,10 @@ extends IntentService {
             Log.d(TAG, "Posting to " + request.getURI().toString());
             
             HttpResponse response = http.execute(request);
+            
+            Log.i(TAG, "Response received: " + response.getStatusLine());
+            
+            int res = response.getStatusLine().getStatusCode();
             
             
         } catch( Exception e) {

@@ -89,9 +89,11 @@ public class LocationUpdateService
     private static final String LOCATION_UPDATE = "com.tenforwardconsulting.cordova.bgloc.LOCATION_UPDATE";
     private static final String STOP_RECORDING  = "com.tenforwardconsulting.cordova.bgloc.STOP_RECORDING";
     private static final String START_RECORDING = "com.tenforwardconsulting.cordova.bgloc.START_RECORDING";
+    private static final String STOP_GEOFENCES = "com.blueshift.cordova.location.STOP_GEOFENCES";
 
     private Location lastLocation;
     private long lastUpdateTime = 0l;
+    private Boolean fastestSpeed = false;
 
     private JSONObject params;
     private JSONObject headers;
@@ -123,6 +125,8 @@ public class LocationUpdateService
 
     private ConnectivityManager connectivityManager;
     private NotificationManager notificationManager;
+    
+    private LocationRequest locationRequest;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -329,7 +333,7 @@ public class LocationUpdateService
         if (locationClientAPI == null) {
             connectToPlayAPI();
         } else if (locationClientAPI.isConnected()) {
-            LocationRequest locationRequest = LocationRequest.create()
+            locationRequest = LocationRequest.create()
                     .setPriority(translateDesiredAccuracy(desiredAccuracy)) // this.accuracy
                     .setFastestInterval(fastestInterval)
                     .setInterval(interval)
@@ -532,16 +536,37 @@ public class LocationUpdateService
             
             int res = response.getStatusLine().getStatusCode();
             
-            if (res == 200) {
-                return true;
-            } else if(res == 410) {
-                Log.e(TAG, "ALERT --- : Got kill signal from server");
-                this.stopRecording();
-                this.cleanUp();
-                return false;
-            } else {
-                return false;
+            switch(res) {
+                case 200:
+                    return true;
+                //Change To Fastest Speed
+                case 201: 
+                    Log.w(TAG, "GOT CODE 201 BACK, START RECORDING AT FASTEST SPEED");
+                    if(!fastestSpeed) {
+                        detachRecorder();
+                        desiredAccuracy = 10;
+                        fastestInterval = 500;
+                        interval = 1000;
+                        attachRecorder();
+                        
+                        Log.e(TAG, "Changed Location params" + locationRequest.toString());
+                        fastestSpeed = true;
+                    }
+                    return true;
+                case 410: 
+                    Log.e(TAG, "ALERT --- : Got kill signal from server");
+                    
+                    Intent intent = new Intent();
+                    intent.setAction(STOP_GEOFENCES);
+                    sendBroadcast(intent);
+                    
+                    this.stopRecording();
+                    this.cleanUp();
+                    return false;
+                default:
+                    return false;
             }
+                    
         } catch (Throwable e) {
             Log.w(TAG, "Exception posting location: " + e);
             e.printStackTrace();
