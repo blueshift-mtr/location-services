@@ -54,9 +54,7 @@ GoogleApiClient.OnConnectionFailedListener {
     protected ArrayList<Geofence> geofences;
     
     private JSONArray jsonFences;
-    
-    private ArrayList<String> geofenceIds;
-    
+  
     private PendingIntent geoServicePI;
     
     private static final String STOP_GEOFENCES = "com.blueshift.cordova.location.STOP_GEOFENCES";
@@ -70,7 +68,6 @@ GoogleApiClient.OnConnectionFailedListener {
         
         geoServicePI = null;
         geofences = new ArrayList<Geofence>();
-        geofenceIds = new ArrayList<String>();
         
         registerReceiver(stopGeofenceServiceReceiver, new IntentFilter(STOP_GEOFENCES));
         
@@ -133,7 +130,6 @@ GoogleApiClient.OnConnectionFailedListener {
                 .build();
                 
                 geofences.add(g);
-                geofenceIds.add(f.getString("name"));
             } catch(JSONException e) {
                 e.printStackTrace();
             }
@@ -177,7 +173,7 @@ GoogleApiClient.OnConnectionFailedListener {
     
     private void buildGeofences() {
         if(!locationClientAPI.isConnected()) {
-            Toast.makeText(this, "Shit, you didnt connect!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You didnt connect!", Toast.LENGTH_SHORT).show();
             return;
         }
         
@@ -224,7 +220,7 @@ GoogleApiClient.OnConnectionFailedListener {
     @Override
     public void onConnectionFailed(com.google.android.gms.common.ConnectionResult result) {
         Log.e(TAG, "We failed to connect to the Geo API!" + result);
-        Toast.makeText(this, "COULDNT CONNECT, FUCK", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "COULDNT CONNECT, TRY AGAIN", Toast.LENGTH_SHORT).show();
     }
     
     @Override
@@ -244,7 +240,7 @@ GoogleApiClient.OnConnectionFailedListener {
     
     @Override
     public void onDestroy() {
-        Log.w(TAG, "------------------------------------------ Destroyed Location update Service");
+        Log.w(TAG, "------------------------------------------ Destroyed Geofence update Service");
         this.cleanUp();
         super.onDestroy();
     }
@@ -253,7 +249,7 @@ GoogleApiClient.OnConnectionFailedListener {
         // this.disable();
         Log.i(TAG, "Removing geofences");
         unregisterReceiver(stopGeofenceServiceReceiver);
-        LocationServices.GeofencingApi.removeGeofences(locationClientAPI, geofenceIds);
+        LocationServices.GeofencingApi.removeGeofences(locationClientAPI, getGeofencePendingIntent());
         
     }
     
