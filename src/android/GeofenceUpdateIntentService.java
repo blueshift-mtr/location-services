@@ -125,7 +125,7 @@ extends IntentService {
         
         Toast.makeText(this, "HAY WE TRIGGERED SOMETHIN", Toast.LENGTH_LONG).show();
         
-        startTone("dialtone");
+        //startTone("dialtone");
         
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
             geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
