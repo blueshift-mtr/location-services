@@ -15,7 +15,7 @@
 
     <dependency id="org.apache.cordova.geolocation" />
     <dependency id="org.apache.cordova.dialogs" />
-    <dependency id="com.google.upplayservices" />
+     <dependency id="com.google.playservices" url="https://github.com/wf9a5m75/google-play-services#v23" />
 
     <js-module src="www/LocationServices.js" name="LocationServices">
         <clobbers target="plugins.locationServices" />
